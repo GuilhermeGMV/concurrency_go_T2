@@ -6,6 +6,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/nsf/termbox-go"
 )
 
@@ -18,6 +22,9 @@ const (
 	CorCinzaEscuro     = termbox.ColorDarkGray
 	CorVermelho        = termbox.ColorRed
 	CorVerde           = termbox.ColorGreen
+	CorAmarela         = termbox.ColorYellow
+	CorCiano           = termbox.ColorCyan
+	CorAzul            = termbox.ColorBlue
 	CorParede          = termbox.ColorBlack | termbox.AttrBold | termbox.AttrDim
 	CorFundoParede     = termbox.ColorDarkGray
 	CorTexto           = termbox.ColorDarkGray
@@ -63,8 +70,18 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	// Desenha todos os elementos do mapa
 	for y, linha := range jogo.Mapa {
 		for x, elem := range linha {
-			interfaceDesenharElemento(x, y, elem)
+			if elem.simbolo == Chave.simbolo && chavePegou {
+				interfaceDesenharElemento(x, y, Vazio)
+			} else {
+				interfaceDesenharElemento(x, y, elem)
+			}
+
 		}
+	}
+
+	// Desenha o portal se ainda está ativo
+	if portalAtivo {
+		interfaceDesenharCaractere(26, 22, Portal.simbolo, Portal.cor, Portal.corFundo)
 	}
 
 	// Desenha os guardiões por cima
@@ -76,7 +93,7 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	interfaceDesenharElemento(jogo.PosX, jogo.PosY, Personagem)
 
 	// Desenha a barra de status
-	interfaceDesenharBarraDeStatus(jogo)
+	interfaceDesenharBarraDeStatus(jogo, chavePegou, portalAtivo, tempoRestante)
 
 	// Atualiza a tela
 	interfaceAtualizarTela()
@@ -98,29 +115,47 @@ func interfaceDesenharElemento(x, y int, elem Elemento) {
 }
 
 // Exibe uma barra de status com informações úteis ao jogador
-func interfaceDesenharBarraDeStatus(jogo *Jogo) {
-	// Linha de status dinâmica
-	for i, c := range jogo.StatusMsg {
-		termbox.SetCell(i, len(jogo.Mapa)+1, c, CorTexto, CorPadrao)
+func interfaceDesenharBarraDeStatus(jogo *Jogo, chavePegou bool, portalAtivo bool, tempoRestante int) {
+	mensagem := "Pegue a chave e vá até o portal!"
+
+	if chavePegou {
+		if portalAtivo {
+			mensagem = fmt.Sprintf("Vá até o portal! Tempo restante: %ds", tempoRestante)
+		} else {
+			mensagem = "O portal desapareceu! Você perdeu o tempo!"
+		}
 	}
 
-	// Instruções fixas
-	msg := "Use WASD para mover e E para interagir. ESC para sair."
-	for i, c := range msg {
-		termbox.SetCell(i, len(jogo.Mapa)+3, c, CorTexto, CorPadrao)
+	// Limpa linha 0
+	largura, _ := interfaceTamanhoTela()
+	for x := 0; x < largura; x++ {
+		interfaceDesenharCaractere(x, 0, ' ', termbox.ColorDefault, termbox.ColorBlack)
+	}
+
+	// Desenha a mensagem
+	for i, ch := range mensagem {
+		interfaceDesenharCaractere(i, 0, ch, termbox.ColorWhite, termbox.ColorBlack)
 	}
 }
 
 func interfaceCorFundoVermelho() {
-	interfaceCorDeFundo(termbox.ColorRed)
+	interfaceCorDeFundo(CorVermelho)
+}
+
+func interfaceCorFundoAzul() {
+	interfaceCorDeFundo(CorAzul)
+}
+
+func interfaceCorFundoAmarelo() {
+	interfaceCorDeFundo(CorAmarela)
 }
 
 func interfaceCorFundoPreto() {
-	interfaceCorDeFundo(termbox.ColorBlack)
+	interfaceCorDeFundo(CorPadrao)
 }
 
 func interfaceCorDeFundo(cor termbox.Attribute) {
-	termbox.Clear(termbox.ColorDefault, cor)
+	termbox.Clear(CorPadrao, cor)
 }
 
 func interfaceDesenharTextoCentro(texto string, linha int) {
@@ -138,4 +173,58 @@ func interfaceDesenharCaractere(x, y int, ch rune, corFrente, corFundo termbox.A
 
 func interfaceTamanhoTela() (largura, altura int) {
 	return termbox.Size()
+}
+
+func finalizarComMorte() {
+	for range 3 {
+		interfaceLimparTela()
+
+		interfaceCorFundoVermelho()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+
+		interfaceLimparTela()
+
+		interfaceCorFundoPreto()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	interfaceLimparTela()
+	interfaceDesenharTextoCentro("GAME OVER!", 10)
+	interfaceAtualizarTela()
+
+	time.Sleep(2 * time.Second)
+
+	interfaceFinalizar()
+	os.Exit(0)
+}
+
+func finalizarComVitória() {
+	for range 3 {
+		interfaceLimparTela()
+
+		interfaceCorFundoAzul()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+
+		interfaceLimparTela()
+
+		interfaceCorFundoAmarelo()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	interfaceLimparTela()
+	interfaceDesenharTextoCentro("Você Venceu!", 10)
+	interfaceAtualizarTela()
+
+	time.Sleep(2 * time.Second)
+
+	interfaceFinalizar()
+	os.Exit(0)
 }

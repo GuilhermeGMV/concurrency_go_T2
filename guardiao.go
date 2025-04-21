@@ -16,7 +16,7 @@ type Guardiao struct {
 }
 
 func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g *Guardiao) {
-	ticker := time.NewTicker(400 * time.Millisecond)
+	ticker := time.NewTicker(200 * time.Millisecond)
 	defer ticker.Stop()
 
 	dx, dy := 0, 0
@@ -92,16 +92,4 @@ func direcaoAleatoria() (dx, dy int) {
 		return 0, -1 // Cima
 	}
 	return 0, 0
-}
-
-func distancia(aX, aY, bX, bY int) int {
-	dx := aX - bX
-	if dx < 0 {
-		dx = -dx
-	}
-	dy := aY - bY
-	if dy < 0 {
-		dy = -dy
-	}
-	return dx + dy
 }

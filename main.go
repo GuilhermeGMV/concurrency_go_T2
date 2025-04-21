@@ -8,6 +8,11 @@ import (
 )
 
 var mu sync.Mutex
+var chavePegou bool = false
+var portalAtivo bool = false
+var timerChave *time.Timer
+var expiracaoPortal time.Time
+var tempoRestante int
 
 func main() {
 	// Inicializa a interface (termbox)
@@ -75,8 +80,35 @@ func main() {
 
 		for _, g := range jogo.Guardiões {
 			if g.X == jogo.PosX && g.Y == jogo.PosY {
-				finalizarComMorte(&jogo)
+				finalizarComMorte()
 			}
+		}
+
+		// Verifica se jogador pegou a chave
+		if !chavePegou && jogo.PosX == 62 && jogo.PosY == 20 {
+			chavePegou = true
+			portalAtivo = true
+			expiracaoPortal = time.Now().Add(20 * time.Second)
+			timerChave = time.NewTimer(20 * time.Second)
+		}
+
+		// Se a chave foi pega, verificar se o tempo expirou
+		if chavePegou && portalAtivo {
+			select {
+			case <-timerChave.C:
+				finalizarComMorte()
+			default:
+				// Se o timer ainda não acabou, segue normalmente
+			}
+			tempoRestante = int(time.Until(expiracaoPortal).Seconds())
+			if tempoRestante < 0 {
+				tempoRestante = 0
+			}
+		}
+
+		// Verifica se o jogador chegou ao portal a tempo
+		if chavePegou && portalAtivo && jogo.PosX == 26 && jogo.PosY == 22 {
+			finalizarComVitória()
 		}
 	}
 }
