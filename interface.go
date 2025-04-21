@@ -14,13 +14,13 @@ type Cor = termbox.Attribute
 
 // Definições de cores utilizadas no jogo
 const (
-	CorPadrao     Cor = termbox.ColorDefault
-	CorCinzaEscuro    = termbox.ColorDarkGray
-	CorVermelho       = termbox.ColorRed
-	CorVerde          = termbox.ColorGreen
-	CorParede         = termbox.ColorBlack | termbox.AttrBold | termbox.AttrDim
-	CorFundoParede    = termbox.ColorDarkGray
-	CorTexto          = termbox.ColorDarkGray
+	CorPadrao      Cor = termbox.ColorDefault
+	CorCinzaEscuro     = termbox.ColorDarkGray
+	CorVermelho        = termbox.ColorRed
+	CorVerde           = termbox.ColorGreen
+	CorParede          = termbox.ColorBlack | termbox.AttrBold | termbox.AttrDim
+	CorFundoParede     = termbox.ColorDarkGray
+	CorTexto           = termbox.ColorDarkGray
 )
 
 // EventoTeclado representa uma ação detectada do teclado (como mover, sair ou interagir)
@@ -67,13 +67,18 @@ func interfaceDesenharJogo(jogo *Jogo) {
 		}
 	}
 
-	// Desenha o personagem sobre o mapa
+	// Desenha os guardiões por cima
+	for _, g := range jogo.Guardiões {
+		interfaceDesenharElemento(g.X, g.Y, Inimigo)
+	}
+
+	// Desenha o personagem por cima de tudo
 	interfaceDesenharElemento(jogo.PosX, jogo.PosY, Personagem)
 
 	// Desenha a barra de status
 	interfaceDesenharBarraDeStatus(jogo)
 
-	// Força a atualização do terminal
+	// Atualiza a tela
 	interfaceAtualizarTela()
 }
 
@@ -105,4 +110,3 @@ func interfaceDesenharBarraDeStatus(jogo *Jogo) {
 		termbox.SetCell(i, len(jogo.Mapa)+3, c, CorTexto, CorPadrao)
 	}
 }
-
