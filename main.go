@@ -56,7 +56,7 @@ func main() {
 		select {
 		case evento := <-eventosCh:
 			if continuar := personagemExecutarAcao(evento, &jogo); !continuar {
-				return // Sai do jogo
+				return
 			}
 
 		case <-time.After(50 * time.Millisecond):
@@ -75,8 +75,7 @@ func main() {
 
 		for _, g := range jogo.Guardiões {
 			if g.X == jogo.PosX && g.Y == jogo.PosY {
-				interfaceFinalizar()
-				panic("Você foi pego por um guardião! Fim de jogo.")
+				finalizarComMorte(&jogo)
 			}
 		}
 	}

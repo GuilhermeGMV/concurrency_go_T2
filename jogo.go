@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"os"
+	"time"
 )
 
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
@@ -116,4 +117,34 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 	jogo.Mapa[y][x] = jogo.UltimoVisitado   // restaura o conteúdo anterior
 	jogo.UltimoVisitado = jogo.Mapa[ny][nx] // guarda o conteúdo atual da nova posição
 	jogo.Mapa[ny][nx] = elemento            // move o elemento
+}
+
+func finalizarComMorte(jogo *Jogo) {
+	for i := 0; i < 3; i++ { // Faz 3 piscadas
+		interfaceLimparTela()
+
+		// Tela vermelha
+		interfaceCorFundoVermelho()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+
+		interfaceLimparTela()
+
+		// Tela normal (preta ou fundo padrão)
+		interfaceCorFundoPreto()
+		interfaceAtualizarTela()
+
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	// Depois das piscadas, mostra mensagem final
+	interfaceLimparTela()
+	interfaceDesenharTextoCentro("GAME OVER!", 10) // Altura linha 10 (ajustável)
+	interfaceAtualizarTela()
+
+	time.Sleep(2 * time.Second) // Dá tempo de ler
+
+	interfaceFinalizar()
+	os.Exit(0) // Sai sem dar panic
 }

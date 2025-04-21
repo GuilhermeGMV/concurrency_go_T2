@@ -110,3 +110,32 @@ func interfaceDesenharBarraDeStatus(jogo *Jogo) {
 		termbox.SetCell(i, len(jogo.Mapa)+3, c, CorTexto, CorPadrao)
 	}
 }
+
+func interfaceCorFundoVermelho() {
+	interfaceCorDeFundo(termbox.ColorRed)
+}
+
+func interfaceCorFundoPreto() {
+	interfaceCorDeFundo(termbox.ColorBlack)
+}
+
+func interfaceCorDeFundo(cor termbox.Attribute) {
+	termbox.Clear(termbox.ColorDefault, cor)
+}
+
+func interfaceDesenharTextoCentro(texto string, linha int) {
+	largura, _ := interfaceTamanhoTela()
+	colunaInicio := (largura - len(texto)) / 2
+
+	for i, ch := range texto {
+		interfaceDesenharCaractere(colunaInicio+i, linha, ch, termbox.ColorWhite, termbox.ColorBlack)
+	}
+}
+
+func interfaceDesenharCaractere(x, y int, ch rune, corFrente, corFundo termbox.Attribute) {
+	termbox.SetCell(x, y, ch, corFrente, corFundo)
+}
+
+func interfaceTamanhoTela() (largura, altura int) {
+	return termbox.Size()
+}
