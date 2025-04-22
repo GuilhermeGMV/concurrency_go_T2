@@ -29,6 +29,7 @@ var (
 	Personagem = Elemento{'☺', CorCinzaEscuro, CorPadrao, true}
 	Inimigo    = Elemento{'☠', CorVermelho, CorPadrao, true}
 	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
+	PowerUp    = Elemento{'★', CorAmarela, CorPadrao, false}
 	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
 	Portal     = Elemento{'⧉', CorCiano, CorPadrao, false}
 	Chave      = Elemento{'🔑', CorAmarela, CorPadrao, false}

@@ -4,7 +4,7 @@ package main
 import "fmt"
 
 // Atualiza a posição do personagem com base na tecla pressionada (WASD)
-func personagemMover(tecla rune, jogo *Jogo) {
+func personagemMover(tecla rune, jogo *Jogo, powerUpCh chan<- AlertaPowerUp) {
 	dx, dy := 0, 0
 	switch tecla {
 	case 'w': dy = -1 // Move para cima
@@ -14,8 +14,13 @@ func personagemMover(tecla rune, jogo *Jogo) {
 	}
 
 	nx, ny := jogo.PosX+dx, jogo.PosY+dy
-	// Verifica se o movimento é permitido e realiza a movimentação
+
 	if jogoPodeMoverPara(jogo, nx, ny) {
+		// Verifica se há um PowerUp na nova posição
+		if jogo.Mapa[ny][nx].simbolo == PowerUp.simbolo {
+				powerUpCh <- AlertaPowerUp{Resgatado: true}
+		}
+		
 		jogoMoverElemento(jogo, jogo.PosX, jogo.PosY, dx, dy)
 		jogo.PosX, jogo.PosY = nx, ny
 	}
@@ -30,7 +35,7 @@ func personagemInteragir(jogo *Jogo) {
 }
 
 // Processa o evento do teclado e executa a ação correspondente
-func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo) bool {
+func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo, powerUpCh chan<- AlertaPowerUp) bool {
 	switch ev.Tipo {
 	case "sair":
 		// Retorna false para indicar que o jogo deve terminar
@@ -40,7 +45,7 @@ func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo) bool {
 		personagemInteragir(jogo)
 	case "mover":
 		// Move o personagem com base na tecla
-		personagemMover(ev.Tecla, jogo)
+		personagemMover(ev.Tecla, jogo, powerUpCh)
 	}
 	return true // Continua o jogo
 }

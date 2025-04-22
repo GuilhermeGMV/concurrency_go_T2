@@ -34,12 +34,17 @@ func main() {
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
 
+	powerUpCh := make(chan AlertaPowerUp)
+	powerUp := PowerUpStruct{X: 45, Y: 15};
+  go powerup(&jogo, powerUpCh, &mu, &powerUp)
+
 	// Cria canais individuais para cada guardião
 	var canais []chan AlertaGuardiao
+
 	for i := range jogo.Guardiões {
 		ch := make(chan AlertaGuardiao)
 		canais = append(canais, ch)
-		go guardiao(&jogo, ch, &mu, &jogo.Guardiões[i])
+		go guardiao(&jogo, ch, &mu, &jogo.Guardiões[i], powerUpCh)
 	}
 
 	// Cria canal para eventos de teclado
@@ -60,7 +65,7 @@ func main() {
 	for {
 		select {
 		case evento := <-eventosCh:
-			if continuar := personagemExecutarAcao(evento, &jogo); !continuar {
+			if continuar := personagemExecutarAcao(evento, &jogo, powerUpCh); !continuar {
 				return
 			}
 

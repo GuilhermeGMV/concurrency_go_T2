@@ -15,7 +15,7 @@ type Guardiao struct {
 	UltimoVisitado Elemento
 }
 
-func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g *Guardiao) {
+func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g *Guardiao, powerUpCh chan<- AlertaPowerUp) {
 	ticker := time.NewTicker(200 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -27,6 +27,8 @@ func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g 
 		case cmd := <-comandoCh:
 			if cmd.Detectado {
 				perseguindo = true
+			} else {
+				perseguindo = false
 			}
 		case <-ticker.C:
 			if perseguindo {
@@ -44,11 +46,12 @@ func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g 
 			} else {
 				dx, dy = direcaoAleatoria()
 			}
-			guardiaoMover(jogo, g, dx, dy, mutex)
+			guardiaoMover(jogo, g, dx, dy, mutex, powerUpCh)
 		}
 	}
 }
-func guardiaoMover(jogo *Jogo, g *Guardiao, dx, dy int, mutex *sync.Mutex) {
+
+func guardiaoMover(jogo *Jogo, g *Guardiao, dx, dy int, mutex *sync.Mutex, powerUpCh chan<- AlertaPowerUp) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -56,6 +59,10 @@ func guardiaoMover(jogo *Jogo, g *Guardiao, dx, dy int, mutex *sync.Mutex) {
 
 	// 1. Primeiro tenta na direção ideal
 	if jogoPodeMoverPara(jogo, nx, ny) {
+		if jogo.Mapa[ny][nx].simbolo == PowerUp.simbolo {
+			powerUpCh <- AlertaPowerUp{Destruido: true}
+		}
+
 		jogo.Mapa[g.Y][g.X] = g.UltimoVisitado
 		g.UltimoVisitado = jogo.Mapa[ny][nx]
 		jogo.Mapa[ny][nx] = Inimigo
