@@ -8,6 +8,7 @@ import (
 
 type AlertaGuardiao struct {
 	Detectado bool
+	Pausado bool
 }
 
 type Guardiao struct {
@@ -21,16 +22,21 @@ func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g 
 
 	dx, dy := 0, 0
 	perseguindo := false
+	pausado := false
 
 	for {
 		select {
 		case cmd := <-comandoCh:
 			if cmd.Detectado {
 				perseguindo = true
-			} else {
-				perseguindo = false
+			}
+			if cmd.Pausado {
+				pausado = true
 			}
 		case <-ticker.C:
+			if pausado {
+				continue // Não faz nada enquanto pausado
+			}
 			if perseguindo {
 				mutex.Lock()
 				if jogo.PosX > g.X {

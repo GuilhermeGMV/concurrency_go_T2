@@ -72,6 +72,7 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				}
 				jogo.Guardiões = append(jogo.Guardiões, Guardiao{X: x - bug, Y: y, UltimoVisitado: Vazio}) // registra a posição inicial dos inimigos
 				countg++
+				e = Vazio
 			case Vegetacao.simbolo:
 				e = Vegetacao
 			case Chave.simbolo:

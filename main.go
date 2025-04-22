@@ -36,7 +36,6 @@ func main() {
 
 	powerUpCh := make(chan AlertaPowerUp)
 	powerUp := PowerUpStruct{X: 45, Y: 15};
-  go powerup(&jogo, powerUpCh, &mu, &powerUp)
 
 	// Cria canais individuais para cada guardião
 	var canais []chan AlertaGuardiao
@@ -46,6 +45,8 @@ func main() {
 		canais = append(canais, ch)
 		go guardiao(&jogo, ch, &mu, &jogo.Guardiões[i], powerUpCh)
 	}
+
+  go powerup(&jogo, powerUpCh, &mu, &powerUp, canais)
 
 	// Cria canal para eventos de teclado
 	eventosCh := make(chan EventoTeclado)
@@ -93,8 +94,8 @@ func main() {
 		if !chavePegou && jogo.PosX == 62 && jogo.PosY == 20 {
 			chavePegou = true
 			portalAtivo = true
-			expiracaoPortal = time.Now().Add(20 * time.Second)
-			timerChave = time.NewTimer(20 * time.Second)
+			expiracaoPortal = time.Now().Add(40 * time.Second)
+			timerChave = time.NewTimer(40 * time.Second)
 		}
 
 		// Se a chave foi pega, verificar se o tempo expirou
