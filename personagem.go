@@ -16,11 +16,10 @@ func personagemMover(tecla rune, jogo *Jogo, powerUpCh chan<- AlertaPowerUp) {
 	nx, ny := jogo.PosX+dx, jogo.PosY+dy
 
 	if jogoPodeMoverPara(jogo, nx, ny) {
-		// Verifica se há um PowerUp na nova posição
+		// Se há PowerUp, envia alerta pelo canal do personagem
 		if jogo.Mapa[ny][nx].simbolo == PowerUp.simbolo {
-				powerUpCh <- AlertaPowerUp{Resgatado: true}
+			powerUpCh <- AlertaPowerUp{Resgatado: true}
 		}
-		
 		jogoMoverElemento(jogo, jogo.PosX, jogo.PosY, dx, dy)
 		jogo.PosX, jogo.PosY = nx, ny
 	}

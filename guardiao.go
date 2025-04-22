@@ -35,7 +35,7 @@ func guardiao(jogo *Jogo, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g 
 			}
 		case <-ticker.C:
 			if pausado {
-				continue // Não faz nada enquanto pausado
+				continue
 			}
 			if perseguindo {
 				mutex.Lock()
@@ -63,7 +63,6 @@ func guardiaoMover(jogo *Jogo, g *Guardiao, dx, dy int, mutex *sync.Mutex, power
 
 	nx, ny := g.X+dx, g.Y+dy
 
-	// 1. Primeiro tenta na direção ideal
 	if jogoPodeMoverPara(jogo, nx, ny) {
 		if jogo.Mapa[ny][nx].simbolo == PowerUp.simbolo {
 			powerUpCh <- AlertaPowerUp{Destruido: true}

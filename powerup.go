@@ -15,11 +15,17 @@ type PowerUpStruct struct {
     Ativo bool
 }
 
-func powerup(jogo *Jogo, comandoCh <-chan AlertaPowerUp, mutex *sync.Mutex, p *PowerUpStruct, guardioesCh []chan AlertaGuardiao) {
+func powerup(
+    jogo *Jogo,
+    personagemCh <-chan AlertaPowerUp,
+    mutex *sync.Mutex,
+    p *PowerUpStruct,
+    guardioesPowerUpCh <-chan AlertaPowerUp,
+    guardioesCh []chan AlertaGuardiao,
+) {
     ticker := time.NewTicker(200 * time.Millisecond)
     defer ticker.Stop()
 
-    // Inicialmente coloca o powerup no mapa
     mutex.Lock()
     jogo.Mapa[p.Y][p.X] = PowerUp
     p.Ativo = true
@@ -27,12 +33,12 @@ func powerup(jogo *Jogo, comandoCh <-chan AlertaPowerUp, mutex *sync.Mutex, p *P
 
     for {
         select {
-        case cmd := <-comandoCh:
+        case cmd := <-personagemCh:
             mutex.Lock()
             if (cmd.Resgatado || cmd.Destruido) && p.Ativo {
                 jogo.Mapa[p.Y][p.X] = Vazio
                 p.Ativo = false
-                jogo.UltimoVisitado = Vazio 
+                jogo.UltimoVisitado = Vazio
 
                 if cmd.Resgatado {
                     for _, ch := range guardioesCh {
@@ -40,6 +46,17 @@ func powerup(jogo *Jogo, comandoCh <-chan AlertaPowerUp, mutex *sync.Mutex, p *P
                     }
                 }
 
+                mutex.Unlock()
+                return
+            }
+            mutex.Unlock()
+
+        case cmd := <-guardioesPowerUpCh:
+            mutex.Lock()
+            if (cmd.Resgatado || cmd.Destruido) && p.Ativo {
+                jogo.Mapa[p.Y][p.X] = Vazio
+                p.Ativo = false
+                jogo.UltimoVisitado = Vazio
                 mutex.Unlock()
                 return
             }

@@ -34,8 +34,9 @@ func main() {
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
 
-	powerUpCh := make(chan AlertaPowerUp)
-	powerUp := PowerUpStruct{X: 45, Y: 15};
+	powerUpCh := make(chan AlertaPowerUp) // Canal para o personagem
+	guardioesPowerUpCh := make(chan AlertaPowerUp) // Canal para todos os guardiões
+	powerUp := PowerUpStruct{X: 45, Y: 15}
 
 	// Cria canais individuais para cada guardião
 	var canais []chan AlertaGuardiao
@@ -43,10 +44,12 @@ func main() {
 	for i := range jogo.Guardiões {
 		ch := make(chan AlertaGuardiao)
 		canais = append(canais, ch)
-		go guardiao(&jogo, ch, &mu, &jogo.Guardiões[i], powerUpCh)
+		// Guardião envia para o canal dos guardiões
+		go guardiao(&jogo, ch, &mu, &jogo.Guardiões[i], guardioesPowerUpCh)
 	}
 
-  go powerup(&jogo, powerUpCh, &mu, &powerUp, canais)
+	// PowerUp escuta tanto o canal do personagem quanto dos guardiões
+	go powerup(&jogo, powerUpCh, &mu, &powerUp, guardioesPowerUpCh, canais)
 
 	// Cria canal para eventos de teclado
 	eventosCh := make(chan EventoTeclado)
