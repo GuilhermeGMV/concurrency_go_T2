@@ -17,6 +17,7 @@ var tempoRestante int
 func main() {
 	// Inicializa a interface (termbox)
 	interfaceIniciar()
+	tempoPortal := interfaceSelecionarDificuldade()
 	defer interfaceFinalizar()
 
 	// Usa "mapa.txt" como arquivo padrão ou lê o primeiro argumento
@@ -34,7 +35,7 @@ func main() {
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
 
-	powerUpCh := make(chan AlertaPowerUp) // Canal para o personagem
+	powerUpCh := make(chan AlertaPowerUp)          // Canal para o personagem
 	guardioesPowerUpCh := make(chan AlertaPowerUp) // Canal para todos os guardiões
 	powerUp := PowerUpStruct{X: 45, Y: 15}
 
@@ -97,8 +98,8 @@ func main() {
 		if !chavePegou && jogo.PosX == 62 && jogo.PosY == 20 {
 			chavePegou = true
 			portalAtivo = true
-			expiracaoPortal = time.Now().Add(40 * time.Second)
-			timerChave = time.NewTimer(40 * time.Second)
+			expiracaoPortal = time.Now().Add(time.Duration(tempoPortal) * time.Second)
+			timerChave = time.NewTimer(time.Duration(tempoPortal) * time.Second)
 		}
 
 		// Se a chave foi pega, verificar se o tempo expirou

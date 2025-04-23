@@ -228,3 +228,28 @@ func finalizarComVitória() {
 	interfaceFinalizar()
 	os.Exit(0)
 }
+
+func interfaceSelecionarDificuldade() int {
+	interfaceLimparTela()
+	interfaceDesenharTextoCentro("Selecione a dificuldade:", 8)
+	interfaceDesenharTextoCentro("1 - Facil (40 segundos)", 10)
+	interfaceDesenharTextoCentro("2 - Dificil (20 segundos)", 11)
+	interfaceDesenharTextoCentro("ESC - Sair", 13)
+	interfaceAtualizarTela()
+
+	for {
+		ev := termbox.PollEvent()
+		if ev.Type == termbox.EventKey {
+			switch ev.Ch {
+			case '1':
+				return 40
+			case '2':
+				return 20
+			}
+			if ev.Key == termbox.KeyEsc {
+				interfaceFinalizar()
+				os.Exit(0)
+			}
+		}
+	}
+}
