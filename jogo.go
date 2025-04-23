@@ -53,7 +53,6 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 
 	scanner := bufio.NewScanner(arq)
 	y := 0
-	var countg, bug = 0, 0
 	for scanner.Scan() {
 		linha := scanner.Text()
 		var linhaElems []Elemento
@@ -64,14 +63,7 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				e = Parede
 			case Inimigo.simbolo:
 				e = Inimigo
-				// os inimigos estavam sendo criados no lugar errado e não encontrei o porque então fiz essa gambiarra
-				if countg == 0 {
-					bug = 12
-				} else if countg == 1 {
-					bug = 12
-				}
-				jogo.Guardiões = append(jogo.Guardiões, Guardiao{X: x - bug, Y: y, UltimoVisitado: Vazio}) // registra a posição inicial dos inimigos
-				countg++
+				jogo.Guardiões = append(jogo.Guardiões, Guardiao{X: x - 12, Y: y, UltimoVisitado: Vazio}) // registra a posição inicial dos inimigos
 				e = Vazio
 			case Vegetacao.simbolo:
 				e = Vegetacao
