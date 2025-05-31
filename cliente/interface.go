@@ -1,8 +1,3 @@
-// interface.go - Interface gráfica do jogo usando termbox
-// O código abaixo implementa a interface gráfica do jogo usando a biblioteca termbox-go.
-// A biblioteca termbox-go é uma biblioteca de interface de terminal que permite desenhar
-// elementos na tela, capturar eventos do teclado e gerenciar a aparência do terminal.
-
 package main
 
 import (
@@ -13,10 +8,8 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// Define um tipo Cor para encapsuladar as cores do termbox
 type Cor = termbox.Attribute
 
-// Definições de cores utilizadas no jogo
 const (
 	CorPadrao      Cor = termbox.ColorDefault
 	CorCinzaEscuro     = termbox.ColorDarkGray
@@ -30,7 +23,6 @@ const (
 	CorTexto           = termbox.ColorDarkGray
 )
 
-// EventoTeclado representa uma ação detectada do teclado (como mover, sair ou interagir)
 type EventoTeclado struct {
 	Tipo  string // "sair", "interagir", "mover"
 	Tecla rune   // Tecla pressionada, usada no caso de movimento
@@ -38,70 +30,41 @@ type EventoTeclado struct {
 
 // Inicializa a interface gráfica usando termbox
 func interfaceIniciar() {
-	if err := termbox.Init(); err != nil {
+	err := termbox.Init()
+	if err != nil {
 		panic(err)
 	}
+	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 }
 
-// Encerra o uso da interface termbox
 func interfaceFinalizar() {
 	termbox.Close()
 }
 
 // Lê um evento do teclado e o traduz para um EventoTeclado
 func interfaceLerEventoTeclado() EventoTeclado {
-	ev := termbox.PollEvent()
-	if ev.Type != termbox.EventKey {
-		return EventoTeclado{}
-	}
-	if ev.Key == termbox.KeyEsc {
-		return EventoTeclado{Tipo: "sair"}
-	}
-	if ev.Ch == 'e' {
-		return EventoTeclado{Tipo: "interagir"}
-	}
-	return EventoTeclado{Tipo: "mover", Tecla: ev.Ch}
-}
-
-// Renderiza todo o estado atual do jogo na tela
-func interfaceDesenharJogo(jogo *Jogo) {
-	interfaceLimparTela()
-
-	// Desenha todos os elementos do mapa
-	for y, linha := range jogo.Mapa {
-		for x, elem := range linha {
-			if elem.simbolo == Chave.simbolo && chavePegou {
-				interfaceDesenharElemento(x, y, Vazio)
-			} else {
-				interfaceDesenharElemento(x, y, elem)
+	for {
+		ev := termbox.PollEvent()
+		if ev.Type == termbox.EventKey {
+			if ev.Key == termbox.KeyEsc {
+				return EventoTeclado{Tipo: "sair"}
 			}
-
+			if ev.Ch == 'e' || ev.Ch == 'E' {
+				return EventoTeclado{Tipo: "interagir"}
+			}
+			// se for w/a/s/d → “mover”
+			if ev.Ch == 'w' || ev.Ch == 'a' || ev.Ch == 's' || ev.Ch == 'd' ||
+				ev.Ch == 'W' || ev.Ch == 'A' || ev.Ch == 'S' || ev.Ch == 'D' {
+				return EventoTeclado{Tipo: "mover", Tecla: ev.Ch}
+			}
+			// para outras teclas, continua esperando
 		}
 	}
-
-	// Desenha o portal se ainda está ativo
-	if portalAtivo {
-		interfaceDesenharCaractere(26, 22, Portal.simbolo, Portal.cor, Portal.corFundo)
-	}
-
-	// Desenha os guardiões por cima
-	for _, g := range jogo.Guardiões {
-		interfaceDesenharElemento(g.X, g.Y, Inimigo)
-	}
-
-	// Desenha o personagem por cima de tudo
-	interfaceDesenharElemento(jogo.PosX, jogo.PosY, Personagem)
-
-	// Desenha a barra de status
-	interfaceDesenharBarraDeStatus(jogo, chavePegou, portalAtivo, tempoRestante)
-
-	// Atualiza a tela
-	interfaceAtualizarTela()
 }
 
 // Limpa a tela do terminal
 func interfaceLimparTela() {
-	termbox.Clear(CorPadrao, CorPadrao)
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 }
 
 // Força a atualização da tela do terminal com os dados desenhados
@@ -231,10 +194,8 @@ func finalizarComVitória() {
 
 func interfaceSelecionarDificuldade() int {
 	interfaceLimparTela()
-	interfaceDesenharTextoCentro("Selecione a dificuldade:", 8)
-	interfaceDesenharTextoCentro("1 - Facil (40 segundos)", 10)
-	interfaceDesenharTextoCentro("2 - Dificil (20 segundos)", 11)
-	interfaceDesenharTextoCentro("ESC - Sair", 13)
+	writeCentered(10, "1 – Fácil (40 segundos)")
+	writeCentered(12, "2 – Difícil (20 segundos)")
 	interfaceAtualizarTela()
 
 	for {
@@ -245,11 +206,20 @@ func interfaceSelecionarDificuldade() int {
 				return 40
 			case '2':
 				return 20
+			case 'E', 'e':
+				return 40 // pode tratar ‘e’ como saída de modo simplificado
 			}
 			if ev.Key == termbox.KeyEsc {
-				interfaceFinalizar()
-				os.Exit(0)
+				return 40
 			}
 		}
+	}
+}
+
+func writeCentered(y int, msg string) {
+	width, _ := termbox.Size()
+	x := (width - len(msg)) / 2
+	for i, ch := range msg {
+		termbox.SetCell(x+i, y, ch, termbox.ColorWhite, termbox.ColorDefault)
 	}
 }
