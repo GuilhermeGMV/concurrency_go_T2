@@ -16,7 +16,7 @@ type Guardiao struct {
 	UltimoVisitado rune
 }
 
-func guardiao(jogo *Servidor, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g *Guardiao, guardioesPowerUpCh chan<- AlertaPowerUp) {
+func guardiao(jogo *Servidor, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex, g *GuardiaoInterno, guardioesPowerUpCh chan<- AlertaPowerUp) {
 	ticker := time.NewTicker(200 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -64,7 +64,7 @@ func guardiao(jogo *Servidor, comandoCh <-chan AlertaGuardiao, mutex *sync.Mutex
 	}
 }
 
-func guardiaoMover(jogo *Servidor, g *Guardiao, dx, dy int, mutex *sync.Mutex, guardioesPowerUpCh chan<- AlertaPowerUp) {
+func guardiaoMover(jogo *Servidor, g *GuardiaoInterno, dx, dy int, mutex *sync.Mutex, guardioesPowerUpCh chan<- AlertaPowerUp) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -107,10 +107,10 @@ func guardiaoMover(jogo *Servidor, g *Guardiao, dx, dy int, mutex *sync.Mutex, g
 	g.X = newX
 	g.Y = newY
 
-	// Verifica colisão com jogador (se algum jogador ocupa a mesma posição)
+	// Verifica colisão com jogador
 	for id, pj := range jogo.Jogo.Jogadores {
 		if pj.X == newX && pj.Y == newY {
-			// Marca jogador como “morto” removendo do mapa de jogadores
+			// Marca jogador como morto removendo do mapa de jogadores
 			delete(jogo.Jogo.Jogadores, id)
 		}
 	}
@@ -141,7 +141,7 @@ func (s *Servidor) substituirMapa(x, y int, novoRune rune) {
 
 func tentaDesvio(
 	server *Servidor,
-	g *Guardiao,
+	g *GuardiaoInterno,
 	mutex *sync.Mutex,
 	guardioesPowerUpCh chan<- AlertaPowerUp,
 ) {

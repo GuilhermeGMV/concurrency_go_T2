@@ -88,6 +88,12 @@ func main() {
 				_ = y
 			}
 
+			// desenha guardiões
+			for _, g := range estadoReply.Guardioes {
+				interfaceDesenharElemento(g.X, g.Y, Inimigo)
+			}
+
+			// desenha jogadores
 			for _, pl := range estadoReply.Jogadores {
 				interfaceDesenharElemento(pl.X, pl.Y, Personagem)
 			}

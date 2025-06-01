@@ -15,19 +15,30 @@ type Jogador struct {
 	Y    int
 }
 
+type GuardiaoServidor struct {
+	X int
+	Y int
+}
+
+type GuardiaoInterno struct {
+	X              int
+	Y              int
+	UltimoVisitado rune
+}
+
 type EstadoJogo struct {
 	Mapa      []string        // cada linha do mapa é uma string
 	Jogadores map[int]Jogador // mapeia jogadorID → Jogador{ID,Nome,X,Y}
 }
 
 type Servidor struct {
-	mu     sync.Mutex
-	Jogo   EstadoJogo
-	ProxID int
+	mu        sync.Mutex
+	Jogo      EstadoJogo
+	ProxID    int
+	Guardioes []*GuardiaoInterno
 }
 
 type ArgsGetMapa struct{}
-
 type ReplyGetMapa struct {
 	Linhas []string
 }
@@ -36,7 +47,6 @@ type MoveArgs struct {
 	ID      int    // ID do jogador
 	Direcao string // "w", "s", "a", "d"
 }
-
 type MoveReply struct {
 	NovoX int
 	NovoY int
@@ -44,9 +54,9 @@ type MoveReply struct {
 }
 
 type GetEstadoArgs struct{}
-
 type GetEstadoReply struct {
 	Jogadores []Jogador
+	Guardioes []GuardiaoServidor
 }
 
 func NewServidor(mapaPath string) (*Servidor, error) {
@@ -55,7 +65,8 @@ func NewServidor(mapaPath string) (*Servidor, error) {
 			Mapa:      []string{},
 			Jogadores: make(map[int]Jogador),
 		},
-		ProxID: 1,
+		ProxID:    1,
+		Guardioes: []*GuardiaoInterno{},
 	}
 	if err := server.carregarMapa(mapaPath); err != nil {
 		return nil, err
@@ -171,14 +182,21 @@ func (s *Servidor) MoveJogador(args MoveArgs, reply *MoveReply) error {
 	return nil
 }
 
-func (s *Servidor) GetEstado(args GetEstadoArgs, reply *GetEstadoReply) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (server *Servidor) GetEstado(args GetEstadoArgs, reply *GetEstadoReply) error {
+	server.mu.Lock()
+	defer server.mu.Unlock()
 
-	lista := make([]Jogador, 0, len(s.Jogo.Jogadores))
-	for _, j := range s.Jogo.Jogadores {
+	lista := make([]Jogador, 0, len(server.Jogo.Jogadores))
+	for _, j := range server.Jogo.Jogadores {
 		lista = append(lista, j)
 	}
+
+	guards := make([]GuardiaoServidor, 0, len(server.Guardioes))
+	for _, g := range server.Guardioes {
+		guards = append(guards, GuardiaoServidor{X: g.X, Y: g.Y})
+	}
+
 	reply.Jogadores = lista
+	reply.Guardioes = guards
 	return nil
 }

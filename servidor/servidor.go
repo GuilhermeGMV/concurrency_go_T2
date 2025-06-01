@@ -23,8 +23,11 @@ func main() {
 	// Inicia os guardiões e o power-up em goroutines separadas:
 	var mu sync.Mutex
 
-	guard1 := Guardiao{X: 20, Y: 10, UltimoVisitado: ' '}
-	guard2 := Guardiao{X: 30, Y: 12, UltimoVisitado: ' '}
+	guard1 := &GuardiaoInterno{X: 20, Y: 10, UltimoVisitado: ' '}
+	guard2 := &GuardiaoInterno{X: 30, Y: 12, UltimoVisitado: ' '}
+
+	// Insere no struct do servidor
+	server.Guardioes = append(server.Guardioes, guard1, guard2)
 
 	// canal para notificar guardiões sobre Resgatado/Destruido de power-up
 	guardioesPowerUpCh := make(chan AlertaPowerUp)
@@ -37,8 +40,8 @@ func main() {
 	guardioesCh := []chan AlertaGuardiao{ch1, ch2}
 
 	// Inicia goroutine dos guardiões
-	go guardiao(server, ch1, &mu, &guard1, guardioesPowerUpCh)
-	go guardiao(server, ch2, &mu, &guard2, guardioesPowerUpCh)
+	go guardiao(server, ch1, &mu, guard1, guardioesPowerUpCh)
+	go guardiao(server, ch2, &mu, guard1, guardioesPowerUpCh)
 
 	// Exemplo de rotina que detecta quando um jogador ultrapassa X > 58 e notifica guardiões
 	go func() {
