@@ -20,7 +20,7 @@ func main() {
 	defer clientRPC.Close()
 
 	// Registra jogador
-	err = clientRPC.Call("Servidor.RegistrarJogador", "ClienteExemplo", &meuID)
+	err = clientRPC.Call("Servidor.RegistrarJogador", "Cliente", &meuID)
 	if err != nil {
 		log.Fatalf("Erro em RegistrarJogador: %v\n", err)
 	}

@@ -28,7 +28,7 @@ type GuardiaoInterno struct {
 
 type EstadoJogo struct {
 	Mapa      []string        // cada linha do mapa é uma string
-	Jogadores map[int]Jogador // mapeia jogadorID → Jogador{ID,Nome,X,Y}
+	Jogadores map[int]Jogador // mapeia jogadorID -> Jogador{ID,Nome,X,Y}
 }
 
 type Servidor struct {
