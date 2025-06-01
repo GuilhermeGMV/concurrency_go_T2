@@ -25,9 +25,13 @@ func main() {
 
 	guard1 := &GuardiaoInterno{X: 20, Y: 10, UltimoVisitado: ' '}
 	guard2 := &GuardiaoInterno{X: 30, Y: 12, UltimoVisitado: ' '}
+	guard3 := &GuardiaoInterno{X: 20, Y: 20, UltimoVisitado: ' '}
+	guard4 := &GuardiaoInterno{X: 40, Y: 26, UltimoVisitado: ' '}
+	guard5 := &GuardiaoInterno{X: 11, Y: 21, UltimoVisitado: ' '}
+	guard6 := &GuardiaoInterno{X: 65, Y: 27, UltimoVisitado: ' '}
 
 	// Insere no struct do servidor
-	server.Guardioes = append(server.Guardioes, guard1, guard2)
+	server.Guardioes = append(server.Guardioes, guard1, guard2, guard3, guard4, guard5, guard6)
 
 	// canal para notificar guardiões sobre Resgatado/Destruido de power-up
 	guardioesPowerUpCh := make(chan AlertaPowerUp)
@@ -35,13 +39,21 @@ func main() {
 	// canais individuais para cada guardião (para sinais de Detectado e Pausado)
 	ch1 := make(chan AlertaGuardiao)
 	ch2 := make(chan AlertaGuardiao)
+	ch3 := make(chan AlertaGuardiao)
+	ch4 := make(chan AlertaGuardiao)
+	ch5 := make(chan AlertaGuardiao)
+	ch6 := make(chan AlertaGuardiao)
 
 	// Armazena esses canais em slice para enviar “Pausado” em massa
-	guardioesCh := []chan AlertaGuardiao{ch1, ch2}
+	guardioesCh := []chan AlertaGuardiao{ch1, ch2, ch3, ch4, ch5, ch6}
 
 	// Inicia goroutine dos guardiões
 	go guardiao(server, ch1, &mu, guard1, guardioesPowerUpCh)
-	go guardiao(server, ch2, &mu, guard1, guardioesPowerUpCh)
+	go guardiao(server, ch2, &mu, guard2, guardioesPowerUpCh)
+	go guardiao(server, ch3, &mu, guard3, guardioesPowerUpCh)
+	go guardiao(server, ch4, &mu, guard4, guardioesPowerUpCh)
+	go guardiao(server, ch5, &mu, guard5, guardioesPowerUpCh)
+	go guardiao(server, ch6, &mu, guard6, guardioesPowerUpCh)
 
 	// Exemplo de rotina que detecta quando um jogador ultrapassa X > 58 e notifica guardiões
 	go func() {
