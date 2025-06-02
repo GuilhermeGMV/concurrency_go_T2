@@ -29,6 +29,9 @@ type GuardiaoInterno struct {
 type EstadoJogo struct {
 	Mapa      []string        // cada linha do mapa é uma string
 	Jogadores map[int]Jogador // mapeia jogadorID -> Jogador{ID,Nome,X,Y}
+	ChavePegou bool
+	ChaveTimestamp int64
+	TempoLimite int
 }
 
 type Servidor struct {
@@ -59,6 +62,9 @@ type GetEstadoReply struct {
 	Jogadores []Jogador
 	Guardioes []GuardiaoServidor
 	Vitoria   bool
+	ChavePegou bool
+	ChaveTimestamp int64
+	TempoLimite int
 }
 
 type CheckVitoriaArgs struct{}
@@ -121,6 +127,11 @@ func (s *Servidor) RegistrarJogador(nome string, reply *int) error {
 	novo := Jogador{ID: id, Nome: nome, X: 5, Y: 5}
 	s.Jogo.Jogadores[id] = novo
 	*reply = id
+
+	// Garante que TempoLimite é sempre definido
+	if s.Jogo.TempoLimite == 0 {
+		s.Jogo.TempoLimite = 40 // ou 20, se quiser difícil
+	}
 	return nil
 }
 
@@ -206,6 +217,9 @@ func (server *Servidor) GetEstado(args GetEstadoArgs, reply *GetEstadoReply) err
 	reply.Jogadores = lista
 	reply.Guardioes = guards
 	reply.Vitoria = server.Vitoria
+	reply.ChavePegou = server.Jogo.ChavePegou
+	reply.ChaveTimestamp = server.Jogo.ChaveTimestamp
+	reply.TempoLimite = server.Jogo.TempoLimite
 	return nil
 }
 

@@ -9,6 +9,7 @@ import (
 var meuID int
 var jogo Jogo
 var clientRPC *rpc.Client
+var tempoLimite int
 var chavePegou bool
 var tempoInicio time.Time
 
@@ -40,7 +41,6 @@ func main() {
 
 	// Inicializa a interface (termbox)
 	interfaceIniciar()
-	interfaceSelecionarDificuldade()
 	defer interfaceFinalizar()
 
 	// Iniciar goroutine que escuta teclas do usuário
@@ -67,12 +67,21 @@ func main() {
 
 		// A cada tick, atualiza o estado e redesenha
 		case <-ticker.C:
-			// obtém a posição de todos os jogadores conectados
+			// obtém o estado global do servidor
 			var estadoReply GetEstadoReply
 			err := clientRPC.Call("Servidor.GetEstado", GetEstadoArgs{}, &estadoReply)
 			if err != nil {
 				log.Printf("Erro em GetEstado: %v\n", err)
 				continue
+			}
+
+			// Atualiza variáveis globais
+			chavePegou = estadoReply.ChavePegou
+			if estadoReply.TempoLimite > 0 {
+				tempoLimite = estadoReply.TempoLimite
+			}
+			if estadoReply.ChaveTimestamp > 0 {
+				tempoInicio = time.Unix(estadoReply.ChaveTimestamp, 0)
 			}
 
 			// Verifica se houve vitória
@@ -86,11 +95,6 @@ func main() {
 			for _, j := range estadoReply.Jogadores {
 				if j.ID == meuID {
 					encontrado = true
-					// Verifica se o jogador está na posição da chave
-					if jogo.Mapa[j.Y][j.X].simbolo == '🔑' {
-						chavePegou = true
-						tempoInicio = time.Now()
-					}
 					break
 				}
 			}
@@ -130,9 +134,9 @@ func main() {
 				interfaceDesenharElemento(pl.X, pl.Y+1, Personagem)
 			}
 
-			// Desenha barra de status com timer
-			if chavePegou {
-				tempoRestante := 20 - int(time.Since(tempoInicio).Seconds())
+			// Desenha barra de status com timer global
+			if chavePegou && tempoLimite > 0 && tempoInicio.Unix() > 0 {
+				tempoRestante := tempoLimite - int(time.Now().Sub(tempoInicio).Seconds())
 				if tempoRestante <= 0 {
 					finalizarComMorte()
 					return

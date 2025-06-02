@@ -104,13 +104,13 @@ func main() {
 			mu.Lock()
 			for _, pj := range server.Jogo.Jogadores {
 				// Verifica se o jogador está na posição da chave
-				if []rune(server.Jogo.Mapa[pj.Y])[pj.X] == '🔑' {
+				if []rune(server.Jogo.Mapa[pj.Y])[pj.X] == '🔑' && !server.Jogo.ChavePegou {
 					log.Printf("Jogador pegou a chave na posição (%d,%d)\n", pj.X, pj.Y)
-					// Remove a chave do mapa
 					server.substituirMapa(pj.X, pj.Y, ' ')
-					// Cria o portal na posição fixa (14,26)
 					server.substituirMapa(14, 26, '⧉')
 					log.Printf("Portal criado na posição (14,26)\n")
+					server.Jogo.ChavePegou = true
+					server.Jogo.ChaveTimestamp = time.Now().Unix()
 				}
 				// Verifica se o jogador está na posição do portal
 				if []rune(server.Jogo.Mapa[pj.Y])[pj.X] == '⧉' {

@@ -29,7 +29,10 @@ type MoveReply struct {
 
 type GetEstadoArgs struct{}
 type GetEstadoReply struct {
-	Jogadores []Jogador
-	Guardioes []GuardiaoServidor
-	Vitoria   bool
+	Jogadores      []Jogador
+	Guardioes      []GuardiaoServidor
+	Vitoria        bool
+	ChavePegou     bool
+	ChaveTimestamp int64
+	TempoLimite    int
 }
