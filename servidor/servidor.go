@@ -78,9 +78,6 @@ func main() {
 	// power-up em (45, 15)
 	power := PowerUpStruct{X: 45, Y: 15, Ativo: false}
 
-	// Canal para notificar vitória
-	vitoriaCh := make(chan struct{})
-
 	// Rotina que verifica se algum jogador entrou na célula do power-up
 	go func() {
 		for {
@@ -120,8 +117,8 @@ func main() {
 					log.Printf("Jogador entrou no portal na posição (%d,%d)\n", pj.X, pj.Y)
 					// Remove o jogador do mapa (vitória)
 					delete(server.Jogo.Jogadores, pj.ID)
-					// Notifica todos os clientes sobre a vitória
-					vitoriaCh <- struct{}{}
+					// Marca vitória
+					server.Vitoria = true
 				}
 			}
 			mu.Unlock()

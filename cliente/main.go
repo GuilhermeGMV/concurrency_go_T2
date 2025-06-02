@@ -79,6 +79,20 @@ func main() {
 				return
 			}
 
+			// Verifica se o jogador ainda está no jogo
+			encontrado := false
+			for _, j := range estadoReply.Jogadores {
+				if j.ID == meuID {
+					encontrado = true
+					break
+				}
+			}
+			if !encontrado {
+				// Jogador morreu
+				finalizarComMorte()
+				return
+			}
+
 			// Atualiza o mapa do servidor
 			var mapaReply ReplyGetMapa
 			err = clientRPC.Call("Servidor.GetMapa", ArgsGetMapa{}, &mapaReply)

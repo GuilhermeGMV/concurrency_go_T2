@@ -36,6 +36,7 @@ type Servidor struct {
 	Jogo      EstadoJogo
 	ProxID    int
 	Guardioes []*GuardiaoInterno
+	Vitoria   bool
 }
 
 type ArgsGetMapa struct{}
@@ -204,7 +205,7 @@ func (server *Servidor) GetEstado(args GetEstadoArgs, reply *GetEstadoReply) err
 
 	reply.Jogadores = lista
 	reply.Guardioes = guards
-	reply.Vitoria = len(server.Jogo.Jogadores) == 0
+	reply.Vitoria = server.Vitoria
 	return nil
 }
 
