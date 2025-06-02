@@ -9,6 +9,8 @@ import (
 var meuID int
 var jogo Jogo
 var clientRPC *rpc.Client
+var chavePegou bool
+var tempoInicio time.Time
 
 func main() {
 	// Conecta no servidor
@@ -84,6 +86,11 @@ func main() {
 			for _, j := range estadoReply.Jogadores {
 				if j.ID == meuID {
 					encontrado = true
+					// Verifica se o jogador está na posição da chave
+					if jogo.Mapa[j.Y][j.X].simbolo == '🔑' {
+						chavePegou = true
+						tempoInicio = time.Now()
+					}
 					break
 				}
 			}
@@ -106,21 +113,33 @@ func main() {
 			// desenha mapa estático e, em seguida, todos os jogadores
 			interfaceLimparTela()
 
-			// desenha o tabuleiro
+			// desenha o tabuleiro a partir da linha 1
 			for y, linhaElems := range jogo.Mapa {
 				for x, elem := range linhaElems {
-					interfaceDesenharElemento(x, y, elem)
+					interfaceDesenharElemento(x, y+1, elem)
 				}
 			}
 
 			// desenha guardiões
 			for _, g := range estadoReply.Guardioes {
-				interfaceDesenharElemento(g.X, g.Y, Inimigo)
+				interfaceDesenharElemento(g.X, g.Y+1, Inimigo)
 			}
 
 			// desenha jogadores
 			for _, pl := range estadoReply.Jogadores {
-				interfaceDesenharElemento(pl.X, pl.Y, Personagem)
+				interfaceDesenharElemento(pl.X, pl.Y+1, Personagem)
+			}
+
+			// Desenha barra de status com timer
+			if chavePegou {
+				tempoRestante := 20 - int(time.Since(tempoInicio).Seconds())
+				if tempoRestante <= 0 {
+					finalizarComMorte()
+					return
+				}
+				interfaceDesenharBarraDeStatus(&jogo, chavePegou, true, tempoRestante)
+			} else {
+				interfaceDesenharBarraDeStatus(&jogo, false, false, 0)
 			}
 
 			interfaceAtualizarTela()
