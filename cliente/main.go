@@ -73,17 +73,25 @@ func main() {
 				continue
 			}
 
+			// Atualiza o mapa do servidor
+			var mapaReply ReplyGetMapa
+
+			err = clientRPC.Call("Servidor.GetMapa", ArgsGetMapa{}, &mapaReply)
+			
+			if err != nil {
+				log.Printf("Erro em GetMapa: %v\n", err)
+				continue
+			}
+
+			jogoConfigurarMapaServer(mapaReply.Linhas, &jogo)
+
 			// desenha mapa estático e, em seguida, todos os jogadores
 			interfaceLimparTela()
 
 			// desenha o tabuleiro
 			for y, linhaElems := range jogo.Mapa {
 				for x, elem := range linhaElems {
-					if elem.simbolo == Chave.simbolo {
-						interfaceDesenharElemento(x, y, Vazio)
-					} else {
-						interfaceDesenharElemento(x, y, elem)
-					}
+					interfaceDesenharElemento(x, y, elem)
 				}
 				_ = y
 			}
