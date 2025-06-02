@@ -44,7 +44,7 @@ func main() {
 	ch5 := make(chan AlertaGuardiao)
 	ch6 := make(chan AlertaGuardiao)
 
-	// Armazena esses canais em slice para enviar “Pausado” em massa
+	// Armazena esses canais em slice para enviar "Pausado" em massa
 	guardioesCh := []chan AlertaGuardiao{ch1, ch2, ch3, ch4, ch5, ch6}
 
 	// Inicia goroutine dos guardiões
@@ -73,10 +73,14 @@ func main() {
 		}
 	}()
 
-	// Cria canal para sinais de colisão “jogador toca power-up”
+	// Cria canal para sinais de colisão "jogador toca power-up"
 	personagemToPowerCh := make(chan AlertaPowerUp)
 	// power-up em (45, 15)
 	power := PowerUpStruct{X: 45, Y: 15, Ativo: false}
+
+	// Canal para notificar vitória
+	vitoriaCh := make(chan struct{})
+
 	// Rotina que verifica se algum jogador entrou na célula do power-up
 	go func() {
 		for {
@@ -95,6 +99,34 @@ func main() {
 	}()
 	// Inicia goroutine do power-up
 	go powerup(server, personagemToPowerCh, &mu, &power, guardioesPowerUpCh, guardioesCh)
+
+	// Rotina que verifica se algum jogador entrou na célula da chave
+	go func() {
+		for {
+			time.Sleep(50 * time.Millisecond)
+			mu.Lock()
+			for _, pj := range server.Jogo.Jogadores {
+				// Verifica se o jogador está na posição da chave
+				if []rune(server.Jogo.Mapa[pj.Y])[pj.X] == '🔑' {
+					log.Printf("Jogador pegou a chave na posição (%d,%d)\n", pj.X, pj.Y)
+					// Remove a chave do mapa
+					server.substituirMapa(pj.X, pj.Y, ' ')
+					// Cria o portal na posição fixa (14,26)
+					server.substituirMapa(14, 26, '⧉')
+					log.Printf("Portal criado na posição (14,26)\n")
+				}
+				// Verifica se o jogador está na posição do portal
+				if []rune(server.Jogo.Mapa[pj.Y])[pj.X] == '⧉' {
+					log.Printf("Jogador entrou no portal na posição (%d,%d)\n", pj.X, pj.Y)
+					// Remove o jogador do mapa (vitória)
+					delete(server.Jogo.Jogadores, pj.ID)
+					// Notifica todos os clientes sobre a vitória
+					vitoriaCh <- struct{}{}
+				}
+			}
+			mu.Unlock()
+		}
+	}()
 
 	// 4) Inicia listener RPC
 	listen, err := net.Listen("tcp", ":1234")

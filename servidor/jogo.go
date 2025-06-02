@@ -57,6 +57,12 @@ type GetEstadoArgs struct{}
 type GetEstadoReply struct {
 	Jogadores []Jogador
 	Guardioes []GuardiaoServidor
+	Vitoria   bool
+}
+
+type CheckVitoriaArgs struct{}
+type CheckVitoriaReply struct {
+	Vitoria bool
 }
 
 func NewServidor(mapaPath string) (*Servidor, error) {
@@ -198,5 +204,15 @@ func (server *Servidor) GetEstado(args GetEstadoArgs, reply *GetEstadoReply) err
 
 	reply.Jogadores = lista
 	reply.Guardioes = guards
+	reply.Vitoria = len(server.Jogo.Jogadores) == 0
+	return nil
+}
+
+func (server *Servidor) CheckVitoria(args CheckVitoriaArgs, reply *CheckVitoriaReply) error {
+	server.mu.Lock()
+	defer server.mu.Unlock()
+
+	// Se não houver jogadores, significa que alguém venceu
+	reply.Vitoria = len(server.Jogo.Jogadores) == 0
 	return nil
 }

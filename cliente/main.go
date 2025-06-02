@@ -54,7 +54,7 @@ func main() {
 	ticker := time.NewTicker(50 * time.Millisecond)
 	defer ticker.Stop()
 
-	// Loop principal
+	// Loop principal do jogo
 	for {
 		select {
 		// Quando o usuário pressiona alguma tecla
@@ -63,7 +63,7 @@ func main() {
 				return
 			}
 
-		// A cada tick, chama GetEstado + redesenha mapa + jogadores
+		// A cada tick, atualiza o estado e redesenha
 		case <-ticker.C:
 			// obtém a posição de todos os jogadores conectados
 			var estadoReply GetEstadoReply
@@ -73,11 +73,15 @@ func main() {
 				continue
 			}
 
+			// Verifica se houve vitória
+			if estadoReply.Vitoria {
+				finalizarComVitória()
+				return
+			}
+
 			// Atualiza o mapa do servidor
 			var mapaReply ReplyGetMapa
-
 			err = clientRPC.Call("Servidor.GetMapa", ArgsGetMapa{}, &mapaReply)
-			
 			if err != nil {
 				log.Printf("Erro em GetMapa: %v\n", err)
 				continue
@@ -93,7 +97,6 @@ func main() {
 				for x, elem := range linhaElems {
 					interfaceDesenharElemento(x, y, elem)
 				}
-				_ = y
 			}
 
 			// desenha guardiões

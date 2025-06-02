@@ -31,4 +31,5 @@ type GetEstadoArgs struct{}
 type GetEstadoReply struct {
 	Jogadores []Jogador
 	Guardioes []GuardiaoServidor
+	Vitoria   bool
 }
