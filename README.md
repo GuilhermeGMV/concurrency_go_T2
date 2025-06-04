@@ -20,7 +20,7 @@ Este projeto é um pequeno jogo desenvolvido em Go que roda no terminal usando a
 | E     | Interagir         |
 | ESC   | Sair do jogo      |
 
-## Como compilar
+## Como rodar o Servidor
 
 1. Instale o Go e clone este repositório.
 2. Inicialize um novo módulo "jogo":
@@ -30,36 +30,44 @@ go mod init jogo
 go get -u github.com/nsf/termbox-go
 ```
 
-3. Compile o programa:
-
-Linux:
+3. Entre na pasta Servidor
 
 ```bash
-go build -o jogo
+cd servidor
 ```
 
-Windows:
+4. Rode o servidor:
 
 ```bash
-go build -o jogo.exe
+go run *.go
 ```
 
-Também é possivel compilar o projeto usando o comando `make` no Linux ou o script `build.bat` no Windows.
+## Como compilar o Cliente
 
-## Como executar
-
-1. Certifique-se de ter o arquivo `mapa.txt` com um mapa válido.
-2. Execute o programa no termimal:
+1. Instale o Go e clone este repositório.
+2. Inicialize um novo módulo "jogo":
 
 ```bash
-./jogo
+go mod init jogo
+go get -u github.com/nsf/termbox-go
 ```
 
-## Estrutura do projeto
+3. Entre na pasta Cliente
 
-- main.go — Ponto de entrada e loop principal
-- interface.go — Entrada, saída e renderização com termbox
-- jogo.go — Estruturas e lógica do estado do jogo
-- personagem.go — Ações do jogador
+```bash
+cd cliente
+```  
+
+5. Compile o programa:
+
+```bash
+go build
+```
+
+6. Rode o programa:
+
+```bash
+./cliente
+```
 
 
